@@ -7,11 +7,17 @@ import 'sound_effect_platform_interface.dart';
 class MethodChannelSoundEffect extends SoundEffectPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('sound_effect');
+  final methodChannel = const MethodChannel('org.lichess/sound_effect');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<void> load(String soundId, String path) async {
+    await methodChannel.invokeMethod<String>(
+        'load', <String, String>{'soundId': soundId, 'path': path});
+  }
+
+  @override
+  Future<void> play(String soundId, [double volume = 1.0]) async {
+    await methodChannel.invokeMethod<String>('play',
+        <String, String>{'soundId': soundId, 'volume': volume.toString()});
   }
 }
