@@ -1,3 +1,5 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+Initial release:
+- Added `load` function to load a sound file from a path
+- Added `play` function to play a sound

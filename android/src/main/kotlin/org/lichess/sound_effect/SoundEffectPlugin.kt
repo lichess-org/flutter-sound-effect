@@ -17,15 +17,7 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel : MethodChannel
   private lateinit var binding: FlutterPlugin.FlutterPluginBinding
 
-  private val soundPool: SoundPool = SoundPool.Builder()
-    .setMaxStreams(1)
-    .setAudioAttributes(
-      AudioAttributes.Builder()
-      .setUsage(AudioAttributes.USAGE_GAME)
-      .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-      .build()
-    ).build()
-
+  private var soundPool: SoundPool? = null
   private val audioMap = HashMap<String, Int>()
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -36,6 +28,21 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
+      "init" -> {
+        if (soundPool !== null) {
+          result.error("Already initialized", null, null)
+          return
+        }
+        soundPool = SoundPool.Builder()
+                .setMaxStreams(1)
+                .setAudioAttributes(
+                        AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_GAME)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build()
+                ).build()
+        result.success(null)
+      }
       "load" -> {
         val audioId = call.argument<String>("soundId")
         val path = call.argument<String>("path")
@@ -52,7 +59,7 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
         try {
           val assetPath = binding.flutterAssets.getAssetFilePathBySubpath(path)
           val afd = binding.applicationContext.assets.openFd(assetPath)
-          audioMap[audioId] = soundPool.load(afd, 1)
+          audioMap[audioId] = soundPool!!.load(afd, 1)
           result.success(null)
         } catch (e: Exception) {
           result.error("Failed to load sound", e.message, null)
@@ -60,7 +67,7 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
       }
       "play" -> {
         val audioId = call.argument<String>("soundId")
-        val volume = call.argument<String>("volume")?.toFloat() ?: 1f
+        val volume = call.argument<Double>("volume")?.toFloat() ?: 1f
 
         if (audioId === null) {
           result.error("Must supply a soundId", null, null)
@@ -74,8 +81,14 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
           return
         }
 
-        soundPool.play(audio, volume, volume, 1, 0, 1f)
+        soundPool?.play(audio, volume, volume, 1, 0, 1f)
 
+        result.success(null)
+      }
+      "release" -> {
+        soundPool?.release()
+        soundPool = null
+        audioMap.clear()
         result.success(null)
       }
       else -> result.notImplemented()

@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> loadSounds() async {
     try {
+      await _soundEffectPlugin.initialize();
       await _soundEffectPlugin.load('demo', 'assets/sounds/demo.mp3');
       setState(() {
         _soundLoaded = true;
@@ -37,6 +38,16 @@ class _MyAppState extends State<MyApp> {
         _loadError = e.toString();
       });
     }
+  }
+
+  Future<void> releaseSounds() async {
+    await _soundEffectPlugin.release();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    releaseSounds();
   }
 
   @override
@@ -54,14 +65,21 @@ class _MyAppState extends State<MyApp> {
             children: <Widget>[
               if (_loadError != null)
                 Text(_loadError!)
-              else if (_soundLoaded)
+              else if (_soundLoaded) ...[
                 ElevatedButton(
                   onPressed: () {
                     _soundEffectPlugin.play('demo');
                   },
                   child: const Text('Play sound'),
-                )
-              else
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    _soundEffectPlugin.play('demo', volume: 0.3);
+                  },
+                  child: const Text('Play sound (30% volume)'),
+                ),
+              ] else
                 const CircularProgressIndicator(),
             ],
           ),

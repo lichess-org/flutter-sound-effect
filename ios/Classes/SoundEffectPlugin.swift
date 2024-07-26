@@ -8,17 +8,6 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
   private var registrar: FlutterPluginRegistrar? = nil
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let session: AVAudioSession = AVAudioSession.sharedInstance()
-    do {
-        try session.setCategory(AVAudioSession.Category.ambient,
-            mode: AVAudioSession.Mode.default,
-            options: [])
-        try session.setPreferredIOBufferDuration(0.005)
-        try session.setActive(true)
-    } catch let error as NSError {
-        print("Failed to set the audio session: \(error.localizedDescription)")
-    }
-
     let channel = FlutterMethodChannel(name: "org.lichess/sound_effect", binaryMessenger: registrar.messenger())
     let instance = SoundEffectPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
@@ -27,6 +16,18 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
+    case "init":
+        let session: AVAudioSession = AVAudioSession.sharedInstance()
+        do {
+            try session.setCategory(AVAudioSession.Category.ambient,
+                mode: AVAudioSession.Mode.default,
+                options: [])
+            try session.setPreferredIOBufferDuration(0.005)
+            try session.setActive(true)
+        } catch let error as NSError {
+            print("Failed to set the audio session: \(error.localizedDescription)")
+        }
+        result(nil)
     case "load":
         let args = call.arguments as! [String: Any]
         guard let audioId = args["soundId"] as? String else {
@@ -80,6 +81,9 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
         player.volume = Float(volume)
 
         player.play()
+        result(nil)
+    case "release":
+        audioMap.removeAll()
         result(nil)
     default:
         result(FlutterMethodNotImplemented)

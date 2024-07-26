@@ -10,14 +10,24 @@ class MethodChannelSoundEffect extends SoundEffectPlatform {
   final methodChannel = const MethodChannel('org.lichess/sound_effect');
 
   @override
+  Future<void> initialize() async {
+    await methodChannel.invokeMethod<String>('init');
+  }
+
+  @override
   Future<void> load(String soundId, String path) async {
     await methodChannel.invokeMethod<String>(
         'load', <String, String>{'soundId': soundId, 'path': path});
   }
 
   @override
-  Future<void> play(String soundId, [double volume = 1.0]) async {
-    await methodChannel.invokeMethod<String>('play',
-        <String, String>{'soundId': soundId, 'volume': volume.toString()});
+  Future<void> play(String soundId, {double volume = 1.0}) async {
+    await methodChannel.invokeMethod<String>(
+        'play', <String, Object>{'soundId': soundId, 'volume': volume});
+  }
+
+  @override
+  Future<void> release() async {
+    await methodChannel.invokeMethod<String>('release');
   }
 }

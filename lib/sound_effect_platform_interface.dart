@@ -23,11 +23,19 @@ abstract class SoundEffectPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Future<void> initialize() {
+    throw UnimplementedError('init() has not been implemented.');
+  }
+
   Future<void> load(String soundId, String path) {
     throw UnimplementedError('load() has not been implemented.');
   }
 
-  Future<void> play(String soundId, [double volume = 1.0]) {
+  Future<void> play(String soundId, {double volume = 1.0}) {
     throw UnimplementedError('play() has not been implemented.');
+  }
+
+  Future<void> release() {
+    throw UnimplementedError('release() has not been implemented.');
   }
 }
