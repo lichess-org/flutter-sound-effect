@@ -9,7 +9,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
+class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompleteListener {
   companion object {
     private const val CHANNEL_NAME = "org.lichess/sound_effect"
   }
@@ -36,11 +36,15 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
         soundPool = SoundPool.Builder()
                 .setMaxStreams(1)
                 .setAudioAttributes(
-                        AudioAttributes.Builder()
-                                .setUsage(AudioAttributes.USAGE_GAME)
-                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                .build()
-                ).build()
+                  AudioAttributes.Builder()
+                  .setUsage(AudioAttributes.USAGE_GAME)
+                  .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                  .build()
+                )
+                .build()
+
+        soundPool?.setOnLoadCompleteListener(this)
+
         result.success(null)
       }
       "load" -> {
@@ -97,5 +101,14 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+  }
+
+  override fun onLoadComplete(soundPool: SoundPool, sampleId: Int, status: Int) {
+    val audioId = audioMap.filterValues { it == sampleId }.keys.firstOrNull()
+    if (status == 0) {
+      channel.invokeMethod("onLoadComplete", hashMapOf("soundId" to audioId))
+    } else {
+      channel.invokeMethod("onLoadError", hashMapOf("soundId" to audioId, "error" to status))
+    }
   }
 }
