@@ -1,5 +1,5 @@
 group = "org.lichess.sound_effect"
-version = "0.3.0"
+version = "0.1.0"
 
 buildscript {
     ext.kotlin_version = "2.1.0"
