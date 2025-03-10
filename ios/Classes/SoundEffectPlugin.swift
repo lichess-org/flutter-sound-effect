@@ -8,7 +8,12 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
   private var registrar: FlutterPluginRegistrar? = nil
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "org.lichess/sound_effect", binaryMessenger: registrar.messenger())
+    let taskQueue = registrar.messenger().makeBackgroundTaskQueue?()
+    let channel = FlutterMethodChannel(
+        name: "org.lichess/sound_effect",
+        binaryMessenger: registrar.messenger(),
+        codec: FlutterStandardMethodCodec.sharedInstance(),
+        taskQueue: taskQueue)
     let instance = SoundEffectPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     instance.registrar = registrar

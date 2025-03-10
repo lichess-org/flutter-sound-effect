@@ -8,6 +8,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.StandardMethodCodec
 
 class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompleteListener {
   companion object {
@@ -21,7 +22,9 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
   private val audioMap = HashMap<String, Int>()
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, CHANNEL_NAME)
+    val taskQueue =
+      flutterPluginBinding.binaryMessenger.makeBackgroundTaskQueue()
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, CHANNEL_NAME, StandardMethodCodec.INSTANCE, taskQueue)
     binding = flutterPluginBinding
     channel.setMethodCallHandler(this)
   }
