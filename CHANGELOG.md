@@ -1,3 +1,7 @@
+## 0.1.0
+
+- Run platform side handlers in a background thread.
+
 ## 0.0.2
 
 - Make sure the sound is loaded when `load`'s Future is resolved on Android.
