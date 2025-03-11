@@ -1,5 +1,7 @@
 ## 0.1.0
 
+- Allow playing multiple sounds at the same time, with the `maxStreams`
+  parameter in `initialize`.
 - Run platform side handlers in a background thread.
 
 ## 0.0.2
