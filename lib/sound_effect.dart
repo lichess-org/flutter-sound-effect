@@ -4,9 +4,11 @@ import 'sound_effect_platform_interface.dart';
 class SoundEffect {
   /// Initializes the sound effect plugin.
   ///
+  /// [maxStreams] is the maximum number of sound streams that can be played simultaneously.
+  ///
   /// This method must be called before any other methods.
-  Future<void> initialize() {
-    return SoundEffectPlatform.instance.initialize();
+  Future<void> initialize({int maxStreams = 1}) {
+    return SoundEffectPlatform.instance.initialize(maxStreams: maxStreams);
   }
 
   /// Loads a sound effect from an asset file.
