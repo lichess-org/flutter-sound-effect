@@ -23,8 +23,8 @@ abstract class SoundEffectPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> initialize() {
-    throw UnimplementedError('init() has not been implemented.');
+  Future<void> initialize({required int maxStreams}) {
+    throw UnimplementedError('initialize() has not been implemented.');
   }
 
   Future<void> load(String soundId, String path) {

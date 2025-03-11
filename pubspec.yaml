@@ -1,6 +1,6 @@
 name: sound_effect
 description: Play short audio clips with the lowest latency.
-version: 0.0.2
+version: 0.1.0
 repository: https://github.com/lichess-org/flutter-sound-effect
 
 environment:
@@ -15,7 +15,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   plugin:

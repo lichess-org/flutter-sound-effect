@@ -45,8 +45,10 @@ class MethodChannelSoundEffect extends SoundEffectPlatform {
   final methodChannel = const MethodChannel('org.lichess/sound_effect');
 
   @override
-  Future<void> initialize() async {
-    await methodChannel.invokeMethod<String>('init');
+  Future<void> initialize({required int maxStreams}) async {
+    await methodChannel.invokeMethod<String>('init', <String, int>{
+      'maxStreams': maxStreams,
+    });
   }
 
   @override

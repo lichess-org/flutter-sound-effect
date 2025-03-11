@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> loadSounds() async {
     try {
-      await _soundEffectPlugin.initialize();
+      await _soundEffectPlugin.initialize(maxStreams: 2);
       await _soundEffectPlugin.load('demo', 'assets/sounds/demo.mp3');
       setState(() {
         _soundLoaded = true;
@@ -54,9 +54,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('SoundEffect example app'),
-        ),
+        appBar: AppBar(title: const Text('SoundEffect example app')),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

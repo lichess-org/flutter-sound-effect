@@ -2,7 +2,7 @@ PODS:
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
-  - sound_effect (0.0.1):
+  - sound_effect (0.1.0):
     - Flutter
 
 DEPENDENCIES:
@@ -20,9 +20,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
-  sound_effect: 1ffc7b1134620bec38d2d044462a8202df62e2d6
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  sound_effect: 318f1417937eb16269c5ec424c06ee84d8ef2c74
 
 PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

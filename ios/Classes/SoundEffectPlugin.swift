@@ -4,11 +4,17 @@ import AVFoundation
 
 public class SoundEffectPlugin: NSObject, FlutterPlugin {
 
-  private var audioMap = [String : AVAudioPlayer]()
+  private var maxConcurrentSounds = 1
+  private var audioMap = [String : [AVAudioPlayer]]()
   private var registrar: FlutterPluginRegistrar? = nil
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "org.lichess/sound_effect", binaryMessenger: registrar.messenger())
+    let taskQueue = registrar.messenger().makeBackgroundTaskQueue?()
+    let channel = FlutterMethodChannel(
+        name: "org.lichess/sound_effect",
+        binaryMessenger: registrar.messenger(),
+        codec: FlutterStandardMethodCodec.sharedInstance(),
+        taskQueue: taskQueue)
     let instance = SoundEffectPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     instance.registrar = registrar
@@ -17,6 +23,8 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "init":
+        let args = call.arguments as! [String: Any]
+        maxConcurrentSounds = (args["maxStreams"] as? Int) ?? 1
         let session: AVAudioSession = AVAudioSession.sharedInstance()
         do {
             try session.setCategory(AVAudioSession.Category.ambient,
@@ -44,15 +52,23 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
             return
         }
 
-        let player: AVAudioPlayer
+        var player: AVAudioPlayer
         let resourceKey = registrar?.lookupKey(forAsset: path)
         let fullPath = Bundle.main.path(forResource: resourceKey, ofType: nil)!
         let pathUrl = URL(fileURLWithPath: fullPath)
 
         do {
-            player = try AVAudioPlayer(contentsOf: pathUrl)
-            player.prepareToPlay()
-            audioMap[audioId] = player
+            for i in 0..<maxConcurrentSounds {
+                player = try AVAudioPlayer(contentsOf: pathUrl)
+                player.prepareToPlay()
+                if audioMap[audioId] == nil {
+                    audioMap[audioId] = [player]
+                } else if audioMap[audioId]!.count <= i {
+                    audioMap[audioId]!.append(player)
+                } else {
+                    break
+                }
+            }
         } catch {
             result(FlutterError(code: "LOAD_ERROR",
                                 message: "Failed to load audio file",
@@ -70,7 +86,7 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
             return
         }
 
-        guard let player = audioMap[audioId] else {
+        guard let players = audioMap[audioId] else {
             result(FlutterError(code: "PLAY_ERROR",
                                 message: "Invalid soundId",
                                 details: "No audio player found for soundId: \(audioId)" ))
@@ -78,9 +94,15 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
         }
 
         let volume = args["volume"] as? Double ?? 1.0
-        player.volume = Float(volume)
 
-        player.play()
+        for player in players {
+            if !player.isPlaying {
+                player.volume = Float(volume)
+                player.play()
+                break
+            }
+        }
+
         result(nil)
     case "release":
         audioMap.removeAll()

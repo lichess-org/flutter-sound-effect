@@ -33,8 +33,9 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
           result.error("Already initialized", null, null)
           return
         }
+        val maxStreams = call.argument<Int>("maxStreams") ?: 1
         soundPool = SoundPool.Builder()
-                .setMaxStreams(1)
+                .setMaxStreams(maxStreams)
                 .setAudioAttributes(
                   AudioAttributes.Builder()
                   .setUsage(AudioAttributes.USAGE_GAME)
