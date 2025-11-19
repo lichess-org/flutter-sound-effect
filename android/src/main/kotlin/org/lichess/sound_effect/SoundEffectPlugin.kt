@@ -19,7 +19,12 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
   private lateinit var binding: FlutterPlugin.FlutterPluginBinding
 
   private var soundPool: SoundPool? = null
+
+  // Map of audio IDs to SoundPool sample IDs
   private val audioMap = HashMap<String, Int>()
+
+  // Reverse Map of SoundPool sample IDs to audio IDs
+  private val soundMap = HashMap<Int, String>()
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     val taskQueue =
@@ -67,7 +72,9 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
         try {
           val assetPath = binding.flutterAssets.getAssetFilePathBySubpath(path)
           val afd = binding.applicationContext.assets.openFd(assetPath)
-          audioMap[audioId] = soundPool!!.load(afd, 1)
+          val sampleId = soundPool!!.load(afd, 1)
+          audioMap[audioId] = sampleId
+          soundMap[sampleId] = audioId
           result.success(null)
         } catch (e: Exception) {
           result.error("Failed to load sound", e.message, null)
@@ -97,6 +104,7 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
         soundPool?.release()
         soundPool = null
         audioMap.clear()
+        soundMap.clear()
         result.success(null)
       }
       else -> result.notImplemented()
@@ -108,7 +116,7 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
   }
 
   override fun onLoadComplete(soundPool: SoundPool, sampleId: Int, status: Int) {
-    val audioId = audioMap.filterValues { it == sampleId }.keys.firstOrNull()
+    val audioId = soundMap[sampleId] ?: return
     if (status == 0) {
       channel.invokeMethod("onLoadComplete", hashMapOf("soundId" to audioId))
     } else {

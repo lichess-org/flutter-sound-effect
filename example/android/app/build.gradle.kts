@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "org.lichess.sound_effect_example"
     compileSdk = flutter.compileSdkVersion
-    // ndkVersion = flutter.ndkVersion
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
