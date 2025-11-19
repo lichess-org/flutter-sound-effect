@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Fix a potential crash on Android due to a java.util.ConcurrentModificationException
+
 ## 0.1.1
 
 - Run android platform side handlers in a background thread.
