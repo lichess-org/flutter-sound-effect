@@ -7,6 +7,7 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
   private var maxConcurrentSounds = 1
   private var audioMap = [String : [AVAudioPlayer]]()
   private var registrar: FlutterPluginRegistrar? = nil
+  private var isSessionActive = false
 
   public static func register(with registrar: FlutterPluginRegistrar) {
     let taskQueue = registrar.messenger().makeBackgroundTaskQueue?()
@@ -18,6 +19,32 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
     let instance = SoundEffectPlugin()
     registrar.addMethodCallDelegate(instance, channel: channel)
     instance.registrar = registrar
+
+    NotificationCenter.default.addObserver(
+        instance,
+        selector: #selector(appDidEnterBackground),
+        name: UIApplication.didEnterBackgroundNotification,
+        object: nil)
+    NotificationCenter.default.addObserver(
+        instance,
+        selector: #selector(appWillEnterForeground),
+        name: UIApplication.willEnterForegroundNotification,
+        object: nil)
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
+
+  @objc private func appDidEnterBackground() {
+    guard isSessionActive else { return }
+    try? AVAudioSession.sharedInstance().setActive(false,
+        options: .notifyOthersOnDeactivation)
+  }
+
+  @objc private func appWillEnterForeground() {
+    guard isSessionActive else { return }
+    try? AVAudioSession.sharedInstance().setActive(true)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -32,6 +59,7 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
                 options: [])
             try session.setPreferredIOBufferDuration(0.005)
             try session.setActive(true)
+            isSessionActive = true
         } catch let error as NSError {
             print("Failed to set the audio session: \(error.localizedDescription)")
         }
@@ -106,6 +134,9 @@ public class SoundEffectPlugin: NSObject, FlutterPlugin {
         result(nil)
     case "release":
         audioMap.removeAll()
+        isSessionActive = false
+        try? AVAudioSession.sharedInstance().setActive(false,
+            options: .notifyOthersOnDeactivation)
         result(nil)
     default:
         result(FlutterMethodNotImplemented)

@@ -3,14 +3,22 @@ package org.lichess.sound_effect
 import android.media.AudioAttributes
 import android.media.SoundPool
 
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.embedding.engine.plugins.lifecycle.FlutterLifecycleAdapter
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.StandardMethodCodec
 
-class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompleteListener {
+class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompleteListener,
+    ActivityAware, DefaultLifecycleObserver {
   companion object {
     private const val CHANNEL_NAME = "org.lichess/sound_effect"
   }
@@ -19,6 +27,7 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
   private lateinit var binding: FlutterPlugin.FlutterPluginBinding
 
   private var soundPool: SoundPool? = null
+  private var lifecycle: Lifecycle? = null
 
   // Map of audio IDs to SoundPool sample IDs
   private val audioMap = HashMap<String, Int>()
@@ -122,5 +131,37 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
     } else {
       channel.invokeMethod("onLoadError", hashMapOf("soundId" to audioId, "error" to status))
     }
+  }
+
+  // ActivityAware
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
+    lifecycle?.addObserver(this)
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+    lifecycle?.removeObserver(this)
+    lifecycle = null
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
+    lifecycle?.addObserver(this)
+  }
+
+  override fun onDetachedFromActivity() {
+    lifecycle?.removeObserver(this)
+    lifecycle = null
+  }
+
+  // DefaultLifecycleObserver — pause/resume audio when app is backgrounded/foregrounded
+
+  override fun onStop(owner: LifecycleOwner) {
+    soundPool?.autoPause()
+  }
+
+  override fun onStart(owner: LifecycleOwner) {
+    soundPool?.autoResume()
   }
 }
