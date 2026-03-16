@@ -1,3 +1,8 @@
+## 0.1.3
+
+- Release audio session when app is backgrounded to avoid unnecessary battery
+  drain.
+
 ## 0.1.2
 
 - Fix a potential crash on Android due to a java.util.ConcurrentModificationException
