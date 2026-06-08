@@ -28,8 +28,9 @@ class MethodChannelSoundEffect extends SoundEffectPlatform {
           final completer = _completers[soundId];
           if (completer != null) {
             if (!completer.isCompleted) {
-              completer
-                  .completeError(Exception('Failed to load sound $soundId'));
+              completer.completeError(
+                Exception('Failed to load sound $soundId'),
+              );
             }
             _completers.remove(soundId);
           }
@@ -57,19 +58,25 @@ class MethodChannelSoundEffect extends SoundEffectPlatform {
       // On Android, we need to wait for the sound to be loaded.
       final completer = Completer<void>();
       _completers[soundId] = completer;
-      await methodChannel.invokeMethod<String>(
-          'load', <String, String>{'soundId': soundId, 'path': path});
+      await methodChannel.invokeMethod<String>('load', <String, String>{
+        'soundId': soundId,
+        'path': path,
+      });
       return completer.future;
     } else {
-      await methodChannel.invokeMethod<String>(
-          'load', <String, String>{'soundId': soundId, 'path': path});
+      await methodChannel.invokeMethod<String>('load', <String, String>{
+        'soundId': soundId,
+        'path': path,
+      });
     }
   }
 
   @override
   Future<void> play(String soundId, {double volume = 1.0}) async {
-    await methodChannel.invokeMethod<String>(
-        'play', <String, Object>{'soundId': soundId, 'volume': volume});
+    await methodChannel.invokeMethod<String>('play', <String, Object>{
+      'soundId': soundId,
+      'volume': volume,
+    });
   }
 
   @override
