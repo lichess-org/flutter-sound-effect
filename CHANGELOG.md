@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Add Swift Package Manager support for iOS
+
 ## 0.1.3
 
 - Release audio session when app is backgrounded to avoid unnecessary battery

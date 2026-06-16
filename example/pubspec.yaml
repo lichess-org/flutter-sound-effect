@@ -3,9 +3,10 @@ description: "Demonstrates how to use the sound_effect plugin."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 0.0.1+1
 
 environment:
-  sdk: ^3.8.0-70.0.dev
+  sdk: ^3.12.1
 
 dependencies:
   flutter:
@@ -14,7 +15,7 @@ dependencies:
   sound_effect:
     path: ../
 
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
 
 dev_dependencies:
   integration_test:
@@ -22,7 +23,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
 
