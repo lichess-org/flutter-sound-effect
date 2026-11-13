@@ -80,8 +80,10 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
 
         try {
           val assetPath = binding.flutterAssets.getAssetFilePathBySubpath(path)
-          val afd = binding.applicationContext.assets.openFd(assetPath)
-          val sampleId = soundPool!!.load(afd, 1)
+         // SoundPool duplicates the file descriptor, so we must close ours once loaded.
+          val sampleId = binding.applicationContext.assets.openFd(assetPath).use { afd ->
+            soundPool!!.load(afd, 1)
+          }
           audioMap[audioId] = sampleId
           soundMap[sampleId] = audioId
           result.success(null)
@@ -122,6 +124,10 @@ class SoundEffectPlugin: FlutterPlugin, MethodCallHandler, SoundPool.OnLoadCompl
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+    soundPool?.release()
+    soundPool = null
+    audioMap.clear()
+    soundMap.clear()
   }
 
   override fun onLoadComplete(soundPool: SoundPool, sampleId: Int, status: Int) {
